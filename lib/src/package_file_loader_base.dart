@@ -56,11 +56,9 @@ Future<_LoadedFile> _loadPackageFile(String path) async {
     throw FileSystemException('Packages index not found. Run flutter pub get first');
   }
   final lines = await file.readAsLines();
-  final line = lines.firstWhereOrNull((e) => e.startsWith(p));
-  if (line == null) {
-    throw PackageNotFoundException(
-        '$packageName, make sure that the dependency is added to pubspec and run flutter pub get');
-  }
+  final line = lines.firstWhere((e) => e.startsWith(p),
+      orElse: () => throw PackageNotFoundException(
+          '$packageName, make sure that the dependency is added to pubspec and run flutter pub get'));
   final packagePath = line.replaceFirst(p, '').replaceFirst('file://', '');
 
   return _LoadedFile(
