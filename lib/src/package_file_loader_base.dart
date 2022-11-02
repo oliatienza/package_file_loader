@@ -1,8 +1,14 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:build/build.dart';
 
+import 'package_config/package_config.dart';
+
 final packageRegex = RegExp(r'^package:(\w+)\/(.*)$');
+final pubDependencyAbsolutePathRegex =
+    RegExp(r'^\S*pub-cache\/hosted\/pub.dartlang.org\/(\w+)\S*$');
+final gitDependencyAbsolutePathRegex = RegExp(r'^\S*pub-cache\/git\/(\w+)\S*$');
 
 class _LoadedFile {
   _LoadedFile({
@@ -49,12 +55,9 @@ Future<_LoadedFile> _loadPackageFile(String path) async {
     throw FormatException('Could not extract file location from path');
   }
 
+  final packagesIndex = _loadPackagesIndex();
   final p = '$packageName:';
-  final file = File('${Directory.current.path}/.packages');
-  if (!file.existsSync()) {
-    throw FileSystemException('Packages index not found. Run flutter pub get first');
-  }
-  final lines = await file.readAsLines();
+  final lines = await packagesIndex.readAsLines();
   final line = lines.firstWhere((e) => e.startsWith(p),
       orElse: () => throw PackageNotFoundException(
           '$packageName, make sure that the dependency is added to pubspec and run flutter pub get'));
@@ -67,4 +70,40 @@ Future<_LoadedFile> _loadPackageFile(String path) async {
       Uri(scheme: 'file', path: '$packagePath$filePath'),
     ),
   );
+}
+
+String packageFromAbsolutePath(String absolutePath) {
+  final regex = [pubDependencyAbsolutePathRegex, gitDependencyAbsolutePathRegex];
+  for (final r in regex) {
+    var match = r.firstMatch(absolutePath);
+    var group = match?.group(1);
+    if (match?.group(1) != null) {
+      return 'package:$group/';
+    }
+  }
+
+  throw PackageNotFoundException('Could not extract package from input path');
+}
+
+Future<PackageConfig> _loadPackageConfig() async {
+  final file = _loadPackageConfigFile();
+  return PackageConfig.fromJson(jsonDecode(await file.readAsString()));
+}
+
+File _loadPackageConfigFile() {
+  final file = File('${Directory.current.path}/.dart_tool/package_config.json');
+  if (!file.existsSync()) {
+    throw FileSystemException('package_config.json not found. Run flutter pub get first');
+  }
+
+  return file;
+}
+
+File _loadPackagesIndex() {
+  final file = File('${Directory.current.path}/.packages');
+  if (!file.existsSync()) {
+    throw FileSystemException('.packages index not found. Run flutter pub get first');
+  }
+
+  return file;
 }
