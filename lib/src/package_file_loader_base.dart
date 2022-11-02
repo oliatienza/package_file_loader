@@ -72,13 +72,22 @@ Future<_LoadedFile> _loadPackageFile(String path) async {
   );
 }
 
+Future<String> packageImportFromAbsolutePath(String absolutePath) async {
+  final packageName = packageFromAbsolutePath(absolutePath);
+
+  final packages = (await _loadPackageConfig()).packages;
+  final p = packages.firstWhere((element) => element.name == packageName);
+
+  return absolutePath.replaceFirst(p.rootUri, 'package:$packageName');
+}
+
 String packageFromAbsolutePath(String absolutePath) {
   final regex = [pubDependencyAbsolutePathRegex, gitDependencyAbsolutePathRegex];
   for (final r in regex) {
     var match = r.firstMatch(absolutePath);
     var group = match?.group(1);
-    if (match?.group(1) != null) {
-      return 'package:$group/';
+    if (group != null) {
+      return group;
     }
   }
 
