@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:build/build.dart';
-import 'package:collection/collection.dart';
 
 final packageRegex = RegExp(r'^package:(\w+)\/(.*)$');
 

@@ -1,6 +1,6 @@
 import 'package:package_file_loader/package_file_loader.dart';
 
-void main() {
-  var awesome = Awesome();
-  print('awesome: ${awesome.isAwesome}');
+Future<void> main() async {
+  final file = await loadPackageFile('package:package_file_loader/package_file_loader');
+  print(file.existsSync());
 }
