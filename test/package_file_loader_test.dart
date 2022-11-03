@@ -6,6 +6,7 @@ void main() {
   group('Load package exports', () {
     test('Should be able to load test.dart from package test', () async {
       final testFile = await loadPackageFile('package:test/test.dart');
+      print(testFile.path);
       expect(testFile.existsSync(), equals(true));
     });
   });

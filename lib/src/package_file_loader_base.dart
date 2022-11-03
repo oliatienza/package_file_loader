@@ -55,13 +55,13 @@ Future<_LoadedFile> _loadPackageFile(String path) async {
     throw FormatException('Could not extract file location from path');
   }
 
-  final packagesIndex = _loadPackagesIndex();
+  final packageConfig = await _loadPackageConfig();
   final p = '$packageName:';
-  final lines = await packagesIndex.readAsLines();
-  final line = lines.firstWhere((e) => e.startsWith(p),
+  final package = packageConfig.packages.firstWhere((e) => e.name == packageName,
       orElse: () => throw PackageNotFoundException(
           '$packageName, make sure that the dependency is added to pubspec and run flutter pub get'));
-  final packagePath = line.replaceFirst(p, '').replaceFirst('file://', '');
+  final packagePath =
+      '${package.rootUri.replaceFirst(p, '').replaceFirst('file://', '')}/${package.packageUri}';
 
   return _LoadedFile(
     packageName: packageName,
