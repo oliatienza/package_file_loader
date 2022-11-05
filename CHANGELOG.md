@@ -1,3 +1,7 @@
+## 0.1.5
+
+- Downgrade json_annotation version
+
 ## 0.1.4
 
 - Upgrade to Flutter 3.3.7
