@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:build/build.dart';
+import 'package:path/path.dart' as path;
 
 import 'package_config/package_config.dart';
 
@@ -60,8 +61,8 @@ Future<_LoadedFile> _loadPackageFile(String path) async {
   final package = packageConfig.packages.firstWhere((e) => e.name == packageName,
       orElse: () => throw PackageNotFoundException(
           '$packageName, make sure that the dependency is added to pubspec and run flutter pub get'));
-  final packagePath =
-      '${package.rootUri.replaceFirst(p, '').replaceFirst('file://', '')}/${package.packageUri}';
+
+  final packagePath = _getPackagePath(p, package);
 
   return _LoadedFile(
     packageName: packageName,
@@ -92,6 +93,20 @@ String packageFromAbsolutePath(String absolutePath) {
   }
 
   throw PackageNotFoundException('Could not extract package from input path');
+}
+
+String _getPackagePath(String p, Package package) {
+  String rootUri = package.rootUri.replaceFirst(p, '');
+
+  if (package.rootUri.contains('file://')) {
+    rootUri = package.rootUri.replaceFirst('file://', '');
+  } else {
+    // The config file always prepend `../` to the root uri
+    final relative = package.rootUri.replaceFirst('../', '');
+    rootUri = path.normalize(path.absolute(relative));
+  }
+
+  return '$rootUri/${package.packageUri}';
 }
 
 Future<PackageConfig> _loadPackageConfig() async {
