@@ -1,3 +1,7 @@
+## 0.2.0
+
+- Add support for relative package paths
+
 ## 0.1.5
 
 - Downgrade json_annotation version
