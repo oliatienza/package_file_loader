@@ -1,3 +1,7 @@
+## 0.4.2
+
+- Append forward slash to root path when `packageUriAsRoot` is `false`
+
 ## 0.4.1
 
 - Fix `packageUriAsRoot` parameter

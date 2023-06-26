@@ -131,7 +131,7 @@ String _getPackagePath(String p, Package package, {required bool packageUriAsRoo
     rootUri = path.normalize(path.absolute(relative));
   }
 
-  return packageUriAsRoot ? '$rootUri/${package.packageUri}' : rootUri;
+  return '$rootUri/${packageUriAsRoot ? package.packageUri : ''}';
 }
 
 Future<PackageConfig> _loadPackageConfig() async {
