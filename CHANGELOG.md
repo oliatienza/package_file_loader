@@ -1,3 +1,7 @@
+## 0.3.0
+
+- Add sync versions of the load functions
+
 ## 0.2.0
 
 - Add support for relative package paths

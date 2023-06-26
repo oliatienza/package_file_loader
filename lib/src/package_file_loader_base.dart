@@ -33,11 +33,11 @@ class LoadedFileAsset {
   final File file;
 }
 
-Future<File> loadPackageFile(String path) async =>
+Future<File> loadPackageFile(String path, {bool packageUriAsRoot = true}) async =>
     (_loadPackageFile(path, await _loadPackageConfig())).file;
 File loadPackageFileSync(String path) => (_loadPackageFile(path, _loadPackageConfigSync())).file;
 
-Future<LoadedFileAsset> loadPackageFileAsAsset(String path) async {
+Future<LoadedFileAsset> loadPackageFileAsAsset(String path, {bool packageUriAsRoot = true}) async {
   final info = _loadPackageFile(path, await _loadPackageConfig());
   return LoadedFileAsset(assetId: AssetId(info.packageName, info.path), file: info.file);
 }
@@ -47,7 +47,11 @@ Future<LoadedFileAsset> loadPackageFileAsAssetSync(String path) async {
   return LoadedFileAsset(assetId: AssetId(info.packageName, info.path), file: info.file);
 }
 
-_LoadedFile _loadPackageFile(String path, PackageConfig packageConfig) {
+_LoadedFile _loadPackageFile(
+  String path,
+  PackageConfig packageConfig, {
+  bool packageUriAsRoot = true,
+}) {
   final match = packageRegex.firstMatch(path);
   if (match == null) {
     throw FormatException(
@@ -68,7 +72,7 @@ _LoadedFile _loadPackageFile(String path, PackageConfig packageConfig) {
       orElse: () => throw PackageNotFoundException(
           '$packageName, make sure that the dependency is added to pubspec and run flutter pub get'));
 
-  final packagePath = _getPackagePath(p, package);
+  final packagePath = _getPackagePath(p, package, packageUriAsRoot: packageUriAsRoot);
 
   return _LoadedFile(
     packageName: packageName,
@@ -101,7 +105,7 @@ String packageFromAbsolutePath(String absolutePath) {
   throw PackageNotFoundException('Could not extract package from input path');
 }
 
-String _getPackagePath(String p, Package package) {
+String _getPackagePath(String p, Package package, {required bool packageUriAsRoot}) {
   String rootUri = package.rootUri.replaceFirst(p, '');
 
   if (package.rootUri.contains('file://')) {
@@ -112,7 +116,7 @@ String _getPackagePath(String p, Package package) {
     rootUri = path.normalize(path.absolute(relative));
   }
 
-  return '$rootUri/${package.packageUri}';
+  return packageUriAsRoot ? '$rootUri/${package.packageUri}' : rootUri;
 }
 
 Future<PackageConfig> _loadPackageConfig() async {
