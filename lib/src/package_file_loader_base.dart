@@ -33,25 +33,40 @@ class LoadedFileAsset {
   final File file;
 }
 
-Future<File> loadPackageFile(String path, {bool packageUriAsRoot = true}) async =>
-    (_loadPackageFile(path, await _loadPackageConfig())).file;
-File loadPackageFileSync(String path) => (_loadPackageFile(path, _loadPackageConfigSync())).file;
+Future<File> loadPackageFile(String path, {bool packageUriAsRoot = true}) async => _loadPackageFile(
+      path,
+      await _loadPackageConfig(),
+      packageUriAsRoot,
+    ).file;
+
+File loadPackageFileSync(String path, {bool packageUriAsRoot = true}) => _loadPackageFile(
+      path,
+      _loadPackageConfigSync(),
+      packageUriAsRoot,
+    ).file;
 
 Future<LoadedFileAsset> loadPackageFileAsAsset(String path, {bool packageUriAsRoot = true}) async {
-  final info = _loadPackageFile(path, await _loadPackageConfig());
-  return LoadedFileAsset(assetId: AssetId(info.packageName, info.path), file: info.file);
+  final info = _loadPackageFile(path, await _loadPackageConfig(), packageUriAsRoot);
+  return LoadedFileAsset(
+    assetId: AssetId(info.packageName, info.path),
+    file: info.file,
+  );
 }
 
-Future<LoadedFileAsset> loadPackageFileAsAssetSync(String path) async {
-  final info = _loadPackageFile(path, _loadPackageConfigSync());
-  return LoadedFileAsset(assetId: AssetId(info.packageName, info.path), file: info.file);
+Future<LoadedFileAsset> loadPackageFileAsAssetSync(String path,
+    {bool packageUriAsRoot = true}) async {
+  final info = _loadPackageFile(path, _loadPackageConfigSync(), packageUriAsRoot);
+  return LoadedFileAsset(
+    assetId: AssetId(info.packageName, info.path),
+    file: info.file,
+  );
 }
 
 _LoadedFile _loadPackageFile(
   String path,
-  PackageConfig packageConfig, {
-  bool packageUriAsRoot = true,
-}) {
+  PackageConfig packageConfig,
+  bool packageUriAsRoot,
+) {
   final match = packageRegex.firstMatch(path);
   if (match == null) {
     throw FormatException(

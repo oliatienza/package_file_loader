@@ -1,3 +1,11 @@
+## 0.4.1
+
+- Fix `packageUriAsRoot` parameter
+
+## 0.4.0
+
+- Add option to append `packageUri` or not
+
 ## 0.3.0
 
 - Add sync versions of the load functions
