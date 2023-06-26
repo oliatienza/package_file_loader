@@ -33,14 +33,21 @@ class LoadedFileAsset {
   final File file;
 }
 
-Future<File> loadPackageFile(String path) async => (await _loadPackageFile(path)).file;
+Future<File> loadPackageFile(String path) async =>
+    (_loadPackageFile(path, await _loadPackageConfig())).file;
+File loadPackageFileSync(String path) => (_loadPackageFile(path, _loadPackageConfigSync())).file;
 
 Future<LoadedFileAsset> loadPackageFileAsAsset(String path) async {
-  final info = await _loadPackageFile(path);
+  final info = _loadPackageFile(path, await _loadPackageConfig());
   return LoadedFileAsset(assetId: AssetId(info.packageName, info.path), file: info.file);
 }
 
-Future<_LoadedFile> _loadPackageFile(String path) async {
+Future<LoadedFileAsset> loadPackageFileAsAssetSync(String path) async {
+  final info = _loadPackageFile(path, _loadPackageConfigSync());
+  return LoadedFileAsset(assetId: AssetId(info.packageName, info.path), file: info.file);
+}
+
+_LoadedFile _loadPackageFile(String path, PackageConfig packageConfig) {
   final match = packageRegex.firstMatch(path);
   if (match == null) {
     throw FormatException(
@@ -56,7 +63,6 @@ Future<_LoadedFile> _loadPackageFile(String path) async {
     throw FormatException('Could not extract file location from path');
   }
 
-  final packageConfig = await _loadPackageConfig();
   final p = '$packageName:';
   final package = packageConfig.packages.firstWhere((e) => e.name == packageName,
       orElse: () => throw PackageNotFoundException(
@@ -112,6 +118,11 @@ String _getPackagePath(String p, Package package) {
 Future<PackageConfig> _loadPackageConfig() async {
   final file = _loadPackageConfigFile();
   return PackageConfig.fromJson(jsonDecode(await file.readAsString()));
+}
+
+PackageConfig _loadPackageConfigSync() {
+  final file = _loadPackageConfigFile();
+  return PackageConfig.fromJson(jsonDecode(file.readAsStringSync()));
 }
 
 File _loadPackageConfigFile() {
