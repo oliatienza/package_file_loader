@@ -1,11 +1,11 @@
 name: package_file_loader
 description: Simple utility functions for loading a file from packages
-version: 0.4.2
+version: 0.4.3
 homepage: https://github.com/oliatienza/package_file_loader
 repository: https://github.com/oliatienza/package_file_loader
 
 environment:
-  sdk: '>=2.17.6 <4.0.0'
+  sdk: ">=3.0.0"
 
 dependencies:
   build: ^2.0.1

@@ -13,7 +13,7 @@ class PackageConfig {
 
   final int configVersion;
   final List<Package> packages;
-  final DateTime generated;
+  final DateTime? generated;
   final String generator;
   final String generatorVersion;
 

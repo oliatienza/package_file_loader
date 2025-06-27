@@ -8,11 +8,13 @@ part of 'package_config.dart';
 
 PackageConfig _$PackageConfigFromJson(Map<String, dynamic> json) =>
     PackageConfig(
-      configVersion: json['configVersion'] as int,
+      configVersion: (json['configVersion'] as num).toInt(),
       packages: (json['packages'] as List<dynamic>)
           .map((e) => Package.fromJson(e as Map<String, dynamic>))
           .toList(),
-      generated: DateTime.parse(json['generated'] as String),
+      generated: json['generated'] == null
+          ? null
+          : DateTime.parse(json['generated'] as String),
       generator: json['generator'] as String,
       generatorVersion: json['generatorVersion'] as String,
     );
@@ -21,7 +23,7 @@ Map<String, dynamic> _$PackageConfigToJson(PackageConfig instance) =>
     <String, dynamic>{
       'configVersion': instance.configVersion,
       'packages': instance.packages,
-      'generated': instance.generated.toIso8601String(),
+      'generated': instance.generated?.toIso8601String(),
       'generator': instance.generator,
       'generatorVersion': instance.generatorVersion,
     };
