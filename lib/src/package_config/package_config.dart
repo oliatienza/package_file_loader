@@ -11,11 +11,11 @@ class PackageConfig {
     required this.generatorVersion,
   });
 
-  final int configVersion;
+  final int? configVersion;
   final List<Package> packages;
   final DateTime? generated;
-  final String generator;
-  final String generatorVersion;
+  final String? generator;
+  final String? generatorVersion;
 
   factory PackageConfig.fromJson(Map<String, dynamic> json) => _$PackageConfigFromJson(json);
   Map<String, dynamic> toJson() => _$PackageConfigToJson(this);

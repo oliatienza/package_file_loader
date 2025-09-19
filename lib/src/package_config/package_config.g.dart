@@ -8,15 +8,15 @@ part of 'package_config.dart';
 
 PackageConfig _$PackageConfigFromJson(Map<String, dynamic> json) =>
     PackageConfig(
-      configVersion: (json['configVersion'] as num).toInt(),
+      configVersion: (json['configVersion'] as num?)?.toInt(),
       packages: (json['packages'] as List<dynamic>)
           .map((e) => Package.fromJson(e as Map<String, dynamic>))
           .toList(),
       generated: json['generated'] == null
           ? null
           : DateTime.parse(json['generated'] as String),
-      generator: json['generator'] as String,
-      generatorVersion: json['generatorVersion'] as String,
+      generator: json['generator'] as String?,
+      generatorVersion: json['generatorVersion'] as String?,
     );
 
 Map<String, dynamic> _$PackageConfigToJson(PackageConfig instance) =>
