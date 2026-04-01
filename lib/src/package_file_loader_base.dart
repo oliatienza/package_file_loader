@@ -8,7 +8,7 @@ import 'package_config/package_config.dart';
 
 final packageRegex = RegExp(r'^package:(\w+)\/(.*)$');
 final pubDependencyAbsolutePathRegex =
-    RegExp(r'^\S*pub-cache\/hosted\/pub.dartlang.org\/(\w+)\S*$');
+    RegExp(r'^\S*pub-cache\/hosted\/(?:pub\.dartlang\.org|pub\.dev)\/(\w+)\S*$');
 final gitDependencyAbsolutePathRegex = RegExp(r'^\S*pub-cache\/git\/(\w+)\S*$');
 
 class _LoadedFile {
@@ -82,12 +82,11 @@ _LoadedFile _loadPackageFile(
     throw FormatException('Could not extract file location from path');
   }
 
-  final p = '$packageName:';
   final package = packageConfig.packages.firstWhere((e) => e.name == packageName,
       orElse: () => throw PackageNotFoundException(
           '$packageName, make sure that the dependency is added to pubspec and run flutter pub get'));
 
-  final packagePath = _getPackagePath(p, package, packageUriAsRoot: packageUriAsRoot);
+  final packagePath = _getPackagePath(package, packageUriAsRoot: packageUriAsRoot);
 
   return _LoadedFile(
     packageName: packageName,
@@ -104,7 +103,18 @@ Future<String> packageImportFromAbsolutePath(String absolutePath) async {
   final packages = (await _loadPackageConfig()).packages;
   final p = packages.firstWhere((element) => element.name == packageName);
 
-  return absolutePath.replaceFirst(p.rootUri, 'package:$packageName');
+  // Get relative path after rootUri, stripping leading slash
+  var relativePath = absolutePath.substring(p.rootUri.length);
+  if (relativePath.startsWith('/')) {
+    relativePath = relativePath.substring(1);
+  }
+
+  // Strip packageUri prefix (typically "lib/") since package: imports resolve through lib/ implicitly
+  if (relativePath.startsWith(p.packageUri)) {
+    relativePath = relativePath.substring(p.packageUri.length);
+  }
+
+  return 'package:$packageName/$relativePath';
 }
 
 String packageFromAbsolutePath(String absolutePath) {
@@ -120,8 +130,8 @@ String packageFromAbsolutePath(String absolutePath) {
   throw PackageNotFoundException('Could not extract package from input path');
 }
 
-String _getPackagePath(String p, Package package, {required bool packageUriAsRoot}) {
-  String rootUri = package.rootUri.replaceFirst(p, '');
+String _getPackagePath(Package package, {required bool packageUriAsRoot}) {
+  String rootUri;
 
   if (package.rootUri.contains('file://')) {
     rootUri = package.rootUri.replaceFirst('file://', '');
@@ -148,15 +158,6 @@ File _loadPackageConfigFile() {
   final file = File('${Directory.current.path}/.dart_tool/package_config.json');
   if (!file.existsSync()) {
     throw FileSystemException('package_config.json not found. Run flutter pub get first');
-  }
-
-  return file;
-}
-
-File _loadPackagesIndex() {
-  final file = File('${Directory.current.path}/.packages');
-  if (!file.existsSync()) {
-    throw FileSystemException('.packages index not found. Run flutter pub get first');
   }
 
   return file;
